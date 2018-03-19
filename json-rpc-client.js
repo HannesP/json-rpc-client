@@ -4,7 +4,7 @@ class Client {
 		this.id = 0;
 	}
 
-	method(method) {
+	method(methodName) {
 		return params => fetch(this.url, {
 			method: 'POST',
 			headers: {
@@ -13,14 +13,20 @@ class Client {
 			},
 			body: JSON.stringify({
 				jsonrpc: '2.0',
-				method,
+				method: methodName,
 				params: params === undefined ? {} : params,
 				id: this.id++,
 			}),
 			credentials: 'same-origin'
 		})
 		.then(res => res.json())
-		.then(json => json.result);
+		.then(json => {
+			if (json.error !== undefined) {
+				throw json.error.message;
+			} else {
+				return json.result;
+			}
+		});
 	}
 };
 
@@ -32,4 +38,4 @@ export function client(url) {
 		}
 	});
 	return proxy;
-}
+};
